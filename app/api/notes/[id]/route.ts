@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbQueries } from '@/lib/db';
+import { getDbQueries } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const dbQueries = getDbQueries();
     const note = dbQueries.getNoteById.get(parseInt(params.id));
     
     if (!note) {
@@ -16,10 +17,13 @@ export async function GET(
     }
 
     return NextResponse.json(note);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching note:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch note' },
+      { 
+        error: 'Failed to fetch note',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }
@@ -40,14 +44,18 @@ export async function PUT(
       );
     }
 
+    const dbQueries = getDbQueries();
     dbQueries.updateNote.run(title, content, parseInt(params.id));
     const note = dbQueries.getNoteById.get(parseInt(params.id));
 
     return NextResponse.json(note);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating note:', error);
     return NextResponse.json(
-      { error: 'Failed to update note' },
+      { 
+        error: 'Failed to update note',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }
@@ -58,12 +66,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const dbQueries = getDbQueries();
     dbQueries.deleteNote.run(parseInt(params.id));
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting note:', error);
     return NextResponse.json(
-      { error: 'Failed to delete note' },
+      { 
+        error: 'Failed to delete note',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }
