@@ -81,9 +81,10 @@ function htmlToNotionBlocks(html: string): any[] {
 }
 
 export async function syncNoteToNotion(note: Note, notionDatabaseId: string, notionToken: string): Promise<string | null> {
-  // Validate token format
-  if (!notionToken.startsWith('secret_')) {
-    throw new Error('Invalid Notion token format. Token must start with "secret_". Please get your Internal Integration Token from https://www.notion.so/my-integrations');
+  // Validate token format (accept both old secret_ and new ntn_ prefixes)
+  // As of Sept 25, 2024, Notion uses ntn_ prefix for new tokens
+  if (!notionToken.startsWith('secret_') && !notionToken.startsWith('ntn_')) {
+    throw new Error('Invalid Notion token format. Token must start with "secret_" (old format) or "ntn_" (new format). Please get your Internal Integration Token from https://www.notion.so/my-integrations');
   }
 
   // Validate database ID format (should be 32 characters, may have hyphens)

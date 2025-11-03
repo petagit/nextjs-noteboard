@@ -11,7 +11,10 @@ This guide will help you sync your notes from the noteboard to Notion, where eac
    - **Logo**: Optional
    - **Associated workspace**: Select your workspace
 4. Click **"Submit"**
-5. Copy the **Internal Integration Token** (starts with `secret_`)
+5. Copy the **Internal Integration Token** 
+   - New tokens (created after Sept 25, 2024) start with `ntn_`
+   - Old tokens start with `secret_`
+   - Both formats work - use whichever one you have
    - ⚠️ Keep this token secure! It's like a password.
 
 ## Step 2: Create a Notion Database
