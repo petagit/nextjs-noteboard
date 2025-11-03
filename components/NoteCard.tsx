@@ -64,7 +64,7 @@ export default function NoteCard({ note, onSelect, onDelete }: NoteCardProps) {
           onClick={handleDelete}
           className="text-red-500 hover:text-red-700 text-sm font-medium"
         >
-          Delete
+          删除 (Delete)
         </button>
       </div>
       <p className="text-gray-600 text-sm mb-2 line-clamp-2">{getPreview(note.content)}</p>

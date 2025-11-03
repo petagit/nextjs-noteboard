@@ -193,16 +193,16 @@ export default function Home() {
                     <button
                       onClick={handleExportAll}
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-                      title="Export all notes as Markdown"
+                      title="导出所有笔记为 Markdown 文件 (Export all notes as Markdown)"
                     >
-                      Export .md
+                      导出 .md (Export .md)
                     </button>
                   )}
                   <button
                     onClick={handleNewNote}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
-                    New Note
+                    新建笔记 (New Note)
                   </button>
                 </div>
               </div>
@@ -256,7 +256,7 @@ export default function Home() {
                     onClick={handleNewNote}
                     className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    取消 (Cancel)
                   </button>
                 )}
                 <button
@@ -264,7 +264,7 @@ export default function Home() {
                   disabled={isLoading}
                   className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Saving...' : selectedNote ? 'Update' : 'Save'}
+                  {isLoading ? '保存中... (Saving...)' : selectedNote ? '更新 (Update)' : '保存 (Save)'}
                 </button>
               </div>
             </div>
