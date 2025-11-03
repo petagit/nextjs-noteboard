@@ -1,32 +1,11 @@
 'use client';
 
-import React, { useCallback, useMemo } from 'react';
-import { createEditor, Descendant, Editor, Transforms, Text } from 'slate';
-import { Slate, Editable, withReact, RenderLeafProps, RenderElementProps } from 'slate-react';
-import { isHotkey } from 'is-hotkey';
+import React, { useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import 'react-quill/dist/quill.snow.css';
 
-type CustomElement = { type: 'paragraph' | 'heading'; children: CustomText[] };
-type CustomText = { text: string; bold?: boolean; italic?: boolean; underline?: boolean };
-
-declare module 'slate' {
-  interface CustomTypes {
-    Element: CustomElement;
-    Text: CustomText;
-  }
-}
-
-const HOTKEYS: Record<string, string> = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-};
-
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [{ text: '' }],
-  },
-];
+// Dynamically import react-quill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 interface RichTextEditorProps {
   value: string;
@@ -35,116 +14,66 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange, placeholder = 'Start typing...' }: RichTextEditorProps) {
-  const editor = useMemo(() => withReact(createEditor()), []);
-  
-  const parsedValue = useMemo(() => {
-    try {
-      return value ? JSON.parse(value) : initialValue;
-    } catch {
-      return initialValue;
-    }
-  }, [value]);
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ color: [] }, { background: [] }],
+        ['link'],
+        ['clean'],
+      ],
+    }),
+    []
+  );
 
-  const renderLeaf = useCallback((props: RenderLeafProps) => {
-    return <Leaf {...props} />;
-  }, []);
-
-  const renderElement = useCallback((props: RenderElementProps) => {
-    switch (props.element.type) {
-      case 'heading':
-        return <h2 className="text-2xl font-bold mb-2" {...props.attributes}>{props.children}</h2>;
-      default:
-        return <p className="mb-2" {...props.attributes}>{props.children}</p>;
-    }
-  }, []);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    for (const hotkey in HOTKEYS) {
-      if (isHotkey(hotkey, event)) {
-        event.preventDefault();
-        const mark = HOTKEYS[hotkey];
-        toggleMark(editor, mark);
-      }
-    }
-  }, [editor]);
-
-  const handleChange = useCallback((val: Descendant[]) => {
-    onChange(JSON.stringify(val));
-  }, [onChange]);
+  const formats = [
+    'header',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'list',
+    'bullet',
+    'color',
+    'background',
+    'link',
+  ];
 
   return (
-    <div className="border border-gray-300 rounded-lg p-4 min-h-[200px] focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-200">
-      <Slate editor={editor} initialValue={parsedValue} onChange={handleChange}>
-        <div className="mb-2 border-b border-gray-200 pb-2 flex gap-2">
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              toggleMark(editor, 'bold');
-            }}
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded font-bold"
-          >
-            B
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              toggleMark(editor, 'italic');
-            }}
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded italic"
-          >
-            I
-          </button>
-          <button
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              toggleMark(editor, 'underline');
-            }}
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded underline"
-          >
-            U
-          </button>
-        </div>
-        <Editable
-          renderLeaf={renderLeaf}
-          renderElement={renderElement}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="outline-none"
-        />
-      </Slate>
+    <div className="rich-text-editor">
+      <ReactQuill
+        theme="snow"
+        value={value || ''}
+        onChange={onChange}
+        modules={modules}
+        formats={formats}
+        placeholder={placeholder}
+        className="bg-white"
+      />
+      <style jsx global>{`
+        .rich-text-editor .ql-container {
+          min-height: 200px;
+          font-size: 16px;
+        }
+        .rich-text-editor .ql-editor {
+          min-height: 200px;
+        }
+        .rich-text-editor .ql-toolbar {
+          border-top-left-radius: 0.5rem;
+          border-top-right-radius: 0.5rem;
+          border-bottom: 1px solid #e5e7eb;
+        }
+        .rich-text-editor .ql-container {
+          border-bottom-left-radius: 0.5rem;
+          border-bottom-right-radius: 0.5rem;
+        }
+        .rich-text-editor .ql-editor.ql-blank::before {
+          color: #9ca3af;
+          font-style: normal;
+        }
+      `}</style>
     </div>
   );
 }
-
-function Leaf({ attributes, children, leaf }: RenderLeafProps) {
-  if (leaf.bold) {
-    children = <strong>{children}</strong>;
-  }
-  if (leaf.italic) {
-    children = <em>{children}</em>;
-  }
-  if (leaf.underline) {
-    children = <u>{children}</u>;
-  }
-
-  return <span {...attributes}>{children}</span>;
-}
-
-function toggleMark(editor: Editor, format: string) {
-  const isActive = isMarkActive(editor, format);
-
-  if (isActive) {
-    Editor.removeMark(editor, format);
-  } else {
-    Editor.addMark(editor, format, true);
-  }
-}
-
-function isMarkActive(editor: Editor, format: string) {
-  const marks = Editor.marks(editor);
-  return marks ? marks[format as keyof typeof marks] === true : false;
-}
-

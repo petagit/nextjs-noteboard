@@ -4,7 +4,7 @@ A simple noteboard application built with Next.js, featuring a rich text editor 
 
 ## Features
 
-- ✅ Rich text editor with formatting (bold, italic, underline)
+- ✅ Rich text editor with formatting (bold, italic, underline, headers, lists, colors, links)
 - ✅ Create, read, update, and delete notes
 - ✅ SQLite database for persistent storage
 - ✅ Beautiful UI with Tailwind CSS
@@ -42,7 +42,7 @@ To exclude the database from git (recommended for production), uncomment the lin
 - **Next.js 14** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
-- **Slate.js** - Rich text editor
+- **Quill (react-quill)** - Rich text editor
 - **better-sqlite3** - SQLite database
 
 ## Project Structure

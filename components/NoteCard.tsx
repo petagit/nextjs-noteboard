@@ -22,23 +22,18 @@ export default function NoteCard({ note, onSelect, onDelete }: NoteCardProps) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Extract plain text preview from rich text content
+  // Extract plain text preview from Quill HTML content
   const getPreview = (content: string) => {
-    try {
-      const parsed = JSON.parse(content);
-      const extractText = (node: any): string => {
-        if (typeof node === 'string') return node;
-        if (node.text) return node.text;
-        if (node.children) {
-          return node.children.map(extractText).join('');
-        }
-        return '';
-      };
-      const text = parsed.map(extractText).join('').trim();
-      return text.length > 100 ? text.substring(0, 100) + '...' : text;
-    } catch {
-      return content.length > 100 ? content.substring(0, 100) + '...' : content;
-    }
+    if (!content) return '';
+    
+    // Strip HTML tags using regex (works in SSR)
+    const text = content
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+      .replace(/&[a-z]+;/gi, '') // Remove other HTML entities
+      .trim();
+    
+    return text.length > 100 ? text.substring(0, 100) + '...' : text;
   };
 
   return (
@@ -55,7 +50,7 @@ export default function NoteCard({ note, onSelect, onDelete }: NoteCardProps) {
           Delete
         </button>
       </div>
-      <p className="text-gray-600 text-sm mb-2">{getPreview(note.content)}</p>
+      <p className="text-gray-600 text-sm mb-2 line-clamp-2">{getPreview(note.content)}</p>
       <p className="text-gray-400 text-xs">{formatDate(note.updated_at)}</p>
     </div>
   );
