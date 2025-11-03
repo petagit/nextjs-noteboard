@@ -10,7 +10,6 @@ type CustomText = { text: string; bold?: boolean; italic?: boolean; underline?: 
 
 declare module 'slate' {
   interface CustomTypes {
-    Editor: Editor;
     Element: CustomElement;
     Text: CustomText;
   }
