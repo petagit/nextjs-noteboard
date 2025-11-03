@@ -22,6 +22,23 @@ export default function NoteCard({ note, onSelect, onDelete }: NoteCardProps) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const formatDateShort = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
+
   // Extract plain text preview from Quill HTML content
   const getPreview = (content: string) => {
     if (!content) return '';
@@ -51,7 +68,14 @@ export default function NoteCard({ note, onSelect, onDelete }: NoteCardProps) {
         </button>
       </div>
       <p className="text-gray-600 text-sm mb-2 line-clamp-2">{getPreview(note.content)}</p>
-      <p className="text-gray-400 text-xs">{formatDate(note.updated_at)}</p>
+      <div className="flex flex-col gap-1 mt-2">
+        <p className="text-gray-400 text-xs">
+          <span className="font-medium">Created:</span> {formatDate(note.created_at)}
+        </p>
+        <p className="text-gray-400 text-xs">
+          <span className="font-medium">Updated:</span> {formatDate(note.updated_at)}
+        </p>
+      </div>
     </div>
   );
 }

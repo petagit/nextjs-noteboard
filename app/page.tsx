@@ -153,9 +153,11 @@ export default function Home() {
     markdown += `---\n\n`;
 
     notes.forEach((note, index) => {
-      const date = new Date(note.updated_at).toLocaleString();
+      const createdDate = new Date(note.created_at).toLocaleString();
+      const updatedDate = new Date(note.updated_at).toLocaleString();
       markdown += `## ${note.title}\n\n`;
-      markdown += `*Last updated: ${date}*\n\n`;
+      markdown += `*Created: ${createdDate}*\n`;
+      markdown += `*Last updated: ${updatedDate}*\n\n`;
       markdown += `${convertHtmlToMarkdown(note.content)}\n\n`;
       markdown += `---\n\n`;
     });
@@ -233,6 +235,18 @@ export default function Home() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl font-semibold"
                 />
               </div>
+              {selectedNote && (
+                <div className="mb-4 flex gap-4 text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium text-gray-700">Created:</span>{' '}
+                    {new Date(selectedNote.created_at).toLocaleString()}
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Updated:</span>{' '}
+                    {new Date(selectedNote.updated_at).toLocaleString()}
+                  </div>
+                </div>
+              )}
               <div className="mb-4">
                 <RichTextEditor value={content} onChange={setContent} />
               </div>
