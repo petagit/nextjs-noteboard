@@ -1,11 +1,11 @@
-// Unified database adapter - uses Vercel Postgres on Vercel, SQLite locally
+// Unified database adapter - uses Neon Postgres on serverless, SQLite locally
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { sql } from '@vercel/postgres';
+import postgres from 'postgres';
 
-// Check if we're in a serverless environment (Vercel)
-const isServerless = process.env.VERCEL === '1' || process.env.POSTGRES_URL;
+// Check if we're in a serverless environment (Postgres URL provided)
+const isServerless = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 let db: Database.Database | null = null;
 let dbQueries: {
@@ -16,8 +16,34 @@ let dbQueries: {
   deleteNote: Database.Statement;
 } | null = null;
 
-// Initialize Vercel Postgres schema
-async function initVercelPostgres() {
+// Neon/Postgres client (lazy loaded)
+let sql: ReturnType<typeof postgres> | null = null;
+
+function getPostgresClient() {
+  if (sql) {
+    return sql;
+  }
+
+  const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  
+  if (!connectionString) {
+    throw new Error(
+      'PostgreSQL connection string not found. Please set POSTGRES_URL or DATABASE_URL environment variable.'
+    );
+  }
+
+  sql = postgres(connectionString, {
+    max: 1, // Use a single connection for serverless
+    idle_timeout: 20,
+    connect_timeout: 10,
+  });
+
+  return sql;
+}
+
+// Initialize Neon/Postgres schema
+async function initPostgres() {
+  const sql = getPostgresClient();
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS notes (
@@ -86,14 +112,15 @@ function getDb(): Database.Database {
 // Unified query interface
 export async function getAllNotes() {
   if (isServerless) {
-    await initVercelPostgres();
+    await initPostgres();
+    const sql = getPostgresClient();
     const result = await sql`SELECT * FROM notes ORDER BY updated_at DESC`;
-    return result.rows.map((row: any) => ({
+    return result.map((row: any) => ({
       id: row.id as number,
       title: row.title as string,
       content: row.content as string,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      created_at: row.created_at?.toISOString() || row.created_at as string,
+      updated_at: row.updated_at?.toISOString() || row.updated_at as string,
     }));
   } else {
     const queries = getDbQueries();
@@ -103,20 +130,21 @@ export async function getAllNotes() {
 
 export async function getNoteById(id: number) {
   if (isServerless) {
-    await initVercelPostgres();
+    await initPostgres();
+    const sql = getPostgresClient();
     const result = await sql`SELECT * FROM notes WHERE id = ${id}`;
     
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return null;
     }
 
-    const row = result.rows[0];
+    const row = result[0];
     return {
       id: row.id as number,
       title: row.title as string,
       content: row.content as string,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      created_at: row.created_at?.toISOString() || row.created_at as string,
+      updated_at: row.updated_at?.toISOString() || row.updated_at as string,
     };
   } else {
     const queries = getDbQueries();
@@ -126,24 +154,25 @@ export async function getNoteById(id: number) {
 
 export async function createNote(title: string, content: string) {
   if (isServerless) {
-    await initVercelPostgres();
+    await initPostgres();
+    const sql = getPostgresClient();
     const result = await sql`
       INSERT INTO notes (title, content) 
       VALUES (${title}, ${content}) 
       RETURNING *
     `;
     
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       throw new Error('Failed to create note');
     }
 
-    const row = result.rows[0];
+    const row = result[0];
     return {
       id: row.id as number,
       title: row.title as string,
       content: row.content as string,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      created_at: row.created_at?.toISOString() || row.created_at as string,
+      updated_at: row.updated_at?.toISOString() || row.updated_at as string,
     };
   } else {
     const queries = getDbQueries();
@@ -154,7 +183,8 @@ export async function createNote(title: string, content: string) {
 
 export async function updateNote(id: number, title: string, content: string) {
   if (isServerless) {
-    await initVercelPostgres();
+    await initPostgres();
+    const sql = getPostgresClient();
     const result = await sql`
       UPDATE notes 
       SET title = ${title}, content = ${content}, updated_at = CURRENT_TIMESTAMP 
@@ -162,17 +192,17 @@ export async function updateNote(id: number, title: string, content: string) {
       RETURNING *
     `;
     
-    if (result.rows.length === 0) {
+    if (result.length === 0) {
       return null;
     }
 
-    const row = result.rows[0];
+    const row = result[0];
     return {
       id: row.id as number,
       title: row.title as string,
       content: row.content as string,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
+      created_at: row.created_at?.toISOString() || row.created_at as string,
+      updated_at: row.updated_at?.toISOString() || row.updated_at as string,
     };
   } else {
     const queries = getDbQueries();
@@ -183,7 +213,8 @@ export async function updateNote(id: number, title: string, content: string) {
 
 export async function deleteNote(id: number) {
   if (isServerless) {
-    await initVercelPostgres();
+    await initPostgres();
+    const sql = getPostgresClient();
     await sql`DELETE FROM notes WHERE id = ${id}`;
   } else {
     const queries = getDbQueries();
