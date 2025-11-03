@@ -140,6 +140,29 @@ export default function Home() {
     return markdown;
   };
 
+  const downloadNoteAsMarkdown = (note: Note) => {
+    const createdDate = new Date(note.created_at).toLocaleString();
+    const updatedDate = new Date(note.updated_at).toLocaleString();
+    
+    let markdown = `# ${note.title}\n\n`;
+    markdown += `*Created: ${createdDate}*\n`;
+    markdown += `*Last updated: ${updatedDate}*\n\n`;
+    markdown += `${convertHtmlToMarkdown(note.content)}\n`;
+
+    // Create blob and download
+    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Sanitize filename by removing special characters
+    const sanitizedTitle = note.title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    a.download = `${sanitizedTitle}-${new Date().toISOString().split('T')[0]}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportAll = () => {
     if (notes.length === 0) {
       alert('No notes to export');
@@ -216,6 +239,7 @@ export default function Home() {
                       note={note}
                       onSelect={handleSelectNote}
                       onDelete={handleDeleteNote}
+                      onDownload={downloadNoteAsMarkdown}
                     />
                   ))
                 )}
