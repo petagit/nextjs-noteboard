@@ -26,7 +26,16 @@ npm run dev
 
 ## Database
 
-The SQLite database is stored in the `data/notes.db` file. This file persists across code pushes and will not be included in git (though the directory structure is maintained).
+The SQLite database is stored in the `data/notes.db` file. The database file is currently tracked in git, which means it will persist across code pushes. However, this approach has limitations:
+
+- **Local Development**: Works great - the database persists in your local `data/` directory
+- **Git Tracking**: Currently the database is committed to git, which allows persistence but can cause issues as it grows
+- **Production Deployments**: Most hosting platforms (Vercel, Netlify) use ephemeral filesystems, so file-based databases won't persist. For production, consider using a hosted database service like Supabase, PlanetScale, or AWS RDS.
+
+To exclude the database from git (recommended for production), uncomment the line in `.gitignore`:
+```
+/data/notes.db
+```
 
 ## Tech Stack
 

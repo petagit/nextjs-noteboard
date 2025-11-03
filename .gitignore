@@ -34,6 +34,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# SQLite database - keep the database file persistent
+# SQLite database - uncomment to exclude from git (recommended for production)
+# If included in git, the database will persist across pushes but may cause issues
 # /data/notes.db
 
