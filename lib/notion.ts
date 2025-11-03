@@ -81,6 +81,17 @@ function htmlToNotionBlocks(html: string): any[] {
 }
 
 export async function syncNoteToNotion(note: Note, notionDatabaseId: string, notionToken: string): Promise<string | null> {
+  // Validate token format
+  if (!notionToken.startsWith('secret_')) {
+    throw new Error('Invalid Notion token format. Token must start with "secret_". Please get your Internal Integration Token from https://www.notion.so/my-integrations');
+  }
+
+  // Validate database ID format (should be 32 characters, may have hyphens)
+  const cleanDbId = notionDatabaseId.replace(/-/g, '');
+  if (cleanDbId.length !== 32) {
+    throw new Error('Invalid Database ID format. Database ID should be 32 characters. Get it from your database URL or settings.');
+  }
+
   try {
     const notion = new Client({
       auth: notionToken,
@@ -92,7 +103,7 @@ export async function syncNoteToNotion(note: Note, notionDatabaseId: string, not
     // Create page in Notion database
     const response = await notion.pages.create({
       parent: {
-        database_id: notionDatabaseId,
+        database_id: cleanDbId.length === 32 ? cleanDbId : notionDatabaseId,
       },
       properties: {
         title: {
@@ -111,7 +122,19 @@ export async function syncNoteToNotion(note: Note, notionDatabaseId: string, not
     return response.id;
   } catch (error: any) {
     console.error('Error syncing to Notion:', error);
-    throw new Error(`Failed to sync to Notion: ${error.message}`);
+    
+    // Provide more helpful error messages
+    if (error.code === 'unauthorized') {
+      throw new Error('Unauthorized: Invalid token or token does not have access to the database. Check your integration token and make sure it\'s connected to the database.');
+    } else if (error.code === 'object_not_found') {
+      throw new Error('Database not found: Invalid Database ID or integration does not have access. Make sure you connected the integration to the database.');
+    } else if (error.code === 'validation_error') {
+      throw new Error(`Validation error: ${error.message}. Make sure the database has a "Title" property.`);
+    } else if (error.message) {
+      throw new Error(`Notion API error: ${error.message}`);
+    } else {
+      throw new Error(`Failed to sync to Notion: ${JSON.stringify(error)}`);
+    }
   }
 }
 

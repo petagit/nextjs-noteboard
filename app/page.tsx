@@ -187,16 +187,25 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to sync');
+        const errorMsg = data.details || data.error || 'Failed to sync';
+        throw new Error(errorMsg);
       }
 
-      alert(`成功同步 ${data.synced} 条笔记到 Notion\n成功: ${data.synced}, 失败: ${data.failed}\n(Successfully synced ${data.synced} note(s) to Notion)`);
+      if (data.errors && data.errors.length > 0) {
+        const errorList = data.errors.slice(0, 3).join('\n');
+        const moreErrors = data.errors.length > 3 ? `\n... and ${data.errors.length - 3} more` : '';
+        alert(`同步完成\n成功: ${data.synced}, 失败: ${data.failed}\n\n错误详情:\n${errorList}${moreErrors}\n\n(Sync completed: ${data.synced} succeeded, ${data.failed} failed)`);
+      } else {
+        alert(`成功同步 ${data.synced} 条笔记到 Notion\n(Successfully synced ${data.synced} note(s) to Notion)`);
+      }
+      
       setShowNotionModal(false);
       setNotionToken('');
       setNotionDatabaseId('');
     } catch (error: any) {
       console.error('Error syncing to Notion:', error);
-      alert(`同步失败: ${error.message}\n(Sync failed: ${error.message})`);
+      const errorMessage = error.message || 'Unknown error occurred';
+      alert(`同步失败\n\n${errorMessage}\n\n(Sync failed)\n\nCheck browser console for details.`);
     } finally {
       setIsSyncing(false);
     }

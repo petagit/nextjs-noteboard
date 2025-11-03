@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
     console.error('Error syncing to Notion:', error);
     return NextResponse.json(
       {
-        error: 'Failed to sync to Notion',
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: error.message || 'Failed to sync to Notion',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
       { status: 500 }
     );
