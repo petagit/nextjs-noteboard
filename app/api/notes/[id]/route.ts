@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbQueries } from '@/lib/db';
+import { getNoteById, updateNote, deleteNote } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const dbQueries = getDbQueries();
-    const note = dbQueries.getNoteById.get(parseInt(params.id));
+    const note = await getNoteById(parseInt(params.id));
     
     if (!note) {
       return NextResponse.json(
@@ -44,9 +43,14 @@ export async function PUT(
       );
     }
 
-    const dbQueries = getDbQueries();
-    dbQueries.updateNote.run(title, content, parseInt(params.id));
-    const note = dbQueries.getNoteById.get(parseInt(params.id));
+    const note = await updateNote(parseInt(params.id), title, content);
+    
+    if (!note) {
+      return NextResponse.json(
+        { error: 'Note not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(note);
   } catch (error: any) {
@@ -66,8 +70,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const dbQueries = getDbQueries();
-    dbQueries.deleteNote.run(parseInt(params.id));
+    await deleteNote(parseInt(params.id));
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error deleting note:', error);

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbQueries } from '@/lib/db';
+import { getAllNotes, createNote } from '@/lib/db';
 
 export async function GET() {
   try {
-    const dbQueries = getDbQueries();
-    const notes = dbQueries.getAllNotes.all();
+    const notes = await getAllNotes();
     return NextResponse.json(notes);
   } catch (error: any) {
     console.error('Error fetching notes:', error);
@@ -30,10 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const dbQueries = getDbQueries();
-    const result = dbQueries.createNote.run(title, content);
-    const note = dbQueries.getNoteById.get(result.lastInsertRowid);
-
+    const note = await createNote(title, content);
     return NextResponse.json(note, { status: 201 });
   } catch (error: any) {
     console.error('Error creating note:', error);
