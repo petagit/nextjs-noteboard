@@ -54,11 +54,14 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Start t
       />
       <style jsx global>{`
         .rich-text-editor .ql-container {
-          min-height: 200px;
+          min-height: 600px;
+          max-height: 800px;
           font-size: 16px;
         }
         .rich-text-editor .ql-editor {
-          min-height: 200px;
+          min-height: 600px;
+          max-height: 800px;
+          overflow-y: auto;
         }
         .rich-text-editor .ql-toolbar {
           border-top-left-radius: 0.5rem;

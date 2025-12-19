@@ -53,7 +53,7 @@ export default function Home() {
           body: JSON.stringify({ title, content }),
         });
       }
-      
+
       setTitle('');
       setContent('');
       setSelectedNote(null);
@@ -97,7 +97,7 @@ export default function Home() {
 
   const convertHtmlToMarkdown = (html: string): string => {
     if (!html) return '';
-    
+
     // Simple HTML to Markdown converter
     let markdown = html
       // Headers
@@ -147,7 +147,7 @@ export default function Home() {
   const downloadNoteAsMarkdown = (note: Note) => {
     const createdDate = new Date(note.created_at).toLocaleString();
     const updatedDate = new Date(note.updated_at).toLocaleString();
-    
+
     let markdown = `# ${note.title}\n\n`;
     markdown += `*Created: ${createdDate}*\n`;
     markdown += `*Last updated: ${updatedDate}*\n\n`;
@@ -198,7 +198,7 @@ export default function Home() {
       } else {
         alert(`成功同步 ${data.synced} 条笔记到 Notion\n(Successfully synced ${data.synced} note(s) to Notion)`);
       }
-      
+
       setShowNotionModal(false);
       setNotionToken('');
       setNotionDatabaseId('');
@@ -248,9 +248,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Noteboard</h1>
-          <p className="text-gray-600">Create and manage your notes</p>
+        <div className="mb-8 flex items-center gap-4">
+          <img src="/logo.png" alt="Bunny Notes Logo" className="w-16 h-16 object-contain" />
+          <div>
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">Bunny Notes Notepad</h1>
+            <p className="text-gray-600">Create and manage your notes</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -280,7 +283,7 @@ export default function Home() {
                   )}
                   <button
                     onClick={handleNewNote}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                   >
                     新建笔记 (New Note)
                   </button>
@@ -313,7 +316,7 @@ export default function Home() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Note title..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl font-semibold"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-xl font-semibold"
                 />
               </div>
               {selectedNote && (
@@ -343,7 +346,7 @@ export default function Home() {
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? '保存中... (Saving...)' : selectedNote ? '更新 (Update)' : '保存 (Save)'}
                 </button>
@@ -361,7 +364,7 @@ export default function Home() {
             <p className="text-sm text-gray-600 mb-4">
               输入您的 Notion 集成凭证以同步所有笔记 (Enter your Notion integration credentials to sync all notes)
             </p>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Notion Integration Token
@@ -371,7 +374,7 @@ export default function Home() {
                 value={notionToken}
                 onChange={(e) => setNotionToken(e.target.value)}
                 placeholder="secret_..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -384,7 +387,7 @@ export default function Home() {
                 value={notionDatabaseId}
                 onChange={(e) => setNotionDatabaseId(e.target.value)}
                 placeholder="32字符的数据库ID (32-character database ID)"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -402,7 +405,7 @@ export default function Home() {
               <button
                 onClick={handleSyncToNotion}
                 disabled={isSyncing || !notionToken || !notionDatabaseId}
-                className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSyncing ? '同步中... (Syncing...)' : '开始同步 (Start Sync)'}
               </button>

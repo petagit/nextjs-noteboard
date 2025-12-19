@@ -48,14 +48,14 @@ export default function NoteCard({ note, onSelect, onDelete, onDownload }: NoteC
   // Extract plain text preview from Quill HTML content
   const getPreview = (content: string) => {
     if (!content) return '';
-    
+
     // Strip HTML tags using regex (works in SSR)
     const text = content
       .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
       .replace(/&[a-z]+;/gi, '') // Remove other HTML entities
       .trim();
-    
+
     return text.length > 100 ? text.substring(0, 100) + '...' : text;
   };
 
@@ -69,7 +69,7 @@ export default function NoteCard({ note, onSelect, onDelete, onDownload }: NoteC
         <div className="flex gap-2">
           <button
             onClick={handleDownload}
-            className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+            className="text-orange-500 hover:text-orange-700 text-sm font-medium"
             title="下载为 Markdown (Download as Markdown)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

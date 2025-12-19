@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Noteboard',
-  description: 'A simple noteboard application',
+  title: 'Bunny Notes Notepad',
+  description: 'A simple bunny-themed notepad application',
 }
 
 export default function RootLayout({
