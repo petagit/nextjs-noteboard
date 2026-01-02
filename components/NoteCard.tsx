@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { Note } from '@/types';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Download, Trash2 } from 'lucide-react';
 
 interface NoteCardProps {
   note: Note;
@@ -28,23 +31,6 @@ export default function NoteCard({ note, onSelect, onDelete, onDownload }: NoteC
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const formatDateShort = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return 'Today';
-    } else if (diffDays === 1) {
-      return 'Yesterday';
-    } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
-  };
-
   // Extract plain text preview from Quill HTML content
   const getPreview = (content: string) => {
     if (!content) return '';
@@ -60,40 +46,44 @@ export default function NoteCard({ note, onSelect, onDelete, onDownload }: NoteC
   };
 
   return (
-    <div
+    <Card
       onClick={() => onSelect(note)}
-      className="bg-white border border-gray-200 rounded-lg p-4 cursor-pointer hover:shadow-md transition-shadow"
+      className="cursor-pointer hover:shadow-md transition-shadow mb-3 border-gray-200"
     >
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="text-lg font-semibold text-gray-800">{note.title}</h3>
-        <div className="flex gap-2">
-          <button
+      <CardHeader className="p-4 pb-2 flex-row justify-between items-start space-y-0">
+        <CardTitle className="text-lg font-semibold text-gray-800 line-clamp-1">{note.title}</CardTitle>
+        <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDownload}
-            className="text-orange-500 hover:text-orange-700 text-sm font-medium"
+            className="h-8 w-8 text-orange-500 hover:text-orange-600 hover:bg-orange-50"
             title="下载为 Markdown (Download as Markdown)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-          </button>
-          <button
+            <Download className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleDelete}
-            className="text-red-500 hover:text-red-700 text-sm font-medium"
+            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+            title="删除 (Delete)"
           >
-            删除 (Delete)
-          </button>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-      </div>
-      <p className="text-gray-600 text-sm mb-2 line-clamp-2">{getPreview(note.content)}</p>
-      <div className="flex flex-col gap-1 mt-2">
-        <p className="text-gray-400 text-xs">
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <p className="text-gray-600 text-sm line-clamp-2">{getPreview(note.content)}</p>
+      </CardContent>
+      <CardFooter className="p-4 pt-0 flex flex-col items-start gap-0.5 mt-auto">
+        <p className="text-gray-400 text-[10px]">
           <span className="font-medium">Created:</span> {formatDate(note.created_at)}
         </p>
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-400 text-[10px]">
           <span className="font-medium">Updated:</span> {formatDate(note.updated_at)}
         </p>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
-
